@@ -1,0 +1,210 @@
+<form role="form" name="PremiumRequestConfirmBatch">
+
+
+<h3> Confirm Payments </h3>
+
+
+
+ <div class="row">
+    <label   class="form-group col-sm-3" for="premiumRequestAnticipatedDate">Anticipated Payment Date</label>
+  <p class="input-group col-sm-3">  
+  <input type="text"
+       name="premiumRequestAnticipatedDate"       
+       class="form-control"
+       ng-model="anticipatedDateSelected"
+       ng-change="premiumRequestanticipatedDateUpdated()"
+       datepicker-popup= "MM-dd-yyyy"
+       placeholder="MM-dd-yyyy"
+       is-open="anticipatedDateFieldOpened" />
+
+  <span class="input-group-btn">
+    <button type="button"
+            class="btn btn-default" 
+            ng-click="anticipated_open($event)">
+      <i class="glyphicon glyphicon-calendar"></i>
+    </button>
+  </span>
+  
+  </p>
+
+  
+</div>
+
+
+
+<!-- Table -->
+<div class="form-group ">
+  <!-- this is the grid --> 
+  <wj-flex-grid  items-source="dataTable"    >
+     <wj-flex-grid-column header="Insured Name" binding="insured" is-read-only="true"></wj-flex-grid-column>
+     <wj-flex-grid-column header="Carrier" binding="carrier" is-read-only="true"></wj-flex-grid-column>
+     <wj-flex-grid-column header="Policy Number" binding="policyNro" is-read-only="true"></wj-flex-grid-column>
+     <wj-flex-grid-column header="Due Date" binding="dueDate" is-read-only="true"></wj-flex-grid-column>
+     <wj-flex-grid-column header="Amount Requested" binding="amountPayment" format="n2" aggregate="Sum" is-read-only="true"></wj-flex-grid-column>
+     <wj-flex-grid-column header="Actual Date Paid" binding="paymentDate" ></wj-flex-grid-column>
+     <wj-flex-grid-column header="Actual Amount Paid" binding="amount" format="n2" aggregate="Sum" ></wj-flex-grid-column>
+
+
+
+  </wj-flex-grid>
+
+
+</div> 
+
+<script cam-script type="text/form-script">
+//debugger;
+  var apiUrl = "http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io";
+  var premiumRequestId = 2;
+
+   //Angular Datepicker
+    $scope.anticipated_open = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation();
+        $scope.anticipatedDateFieldOpened = true;    
+      };
+
+
+    //On Form Load
+    inject([ '$scope', '$http', function($scope, $http) {
+  	camForm.on('form-loaded', function() {
+    // tell the form SDK to fetch the variable named 'invoiceData'
+  			 camForm.variableManager.fetchVariable('state');
+  	});
+    }]);  
+
+
+
+
+
+
+
+    //On Change Premium Request Anticipated Date select
+    $scope.premiumRequestanticipatedDateUpdated= function() {
+    		
+    		// 
+        	angular.forEach($scope.data, function(item) {
+        			item.paymentDate = $scope.anticipatedDateSelected;
+        });
+		$scope.dataTable.refresh();
+    };
+
+
+   //On Variables Fetched
+  inject([ '$scope', '$http', '$filter', function($scope, $http , $filter) {
+  	camForm.on('variables-fetched', function() {
+    	// work with the variable (bind it to the current AngularJS $scope)
+    	$scope.state = camForm.variableManager.variableValue('state');
+
+         $scope.getPremiumRequest = function(id) {  
+              //Get Method
+              $http.get(apiUrl+"/premium-requests/"+id).then(function(result) {
+
+              	    $scope.data = [];
+              	   
+					             	
+
+                            	
+              
+            }, function errorCallback(response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                console.log("error");
+          }).then( function(){console.log("ultimo then :P");  
+          	 $scope.getData(result.data);
+          	 $scope.dataTable = new wijmo.collections.CollectionView($scope.data); } );
+          ;
+
+
+
+
+
+         //get Data
+    	$scope.getData= function(premiumRequest) {
+    		//console.log(premiumRequest.batches[0].policies);
+	        //$scope.data = [];
+	        // Convert String Dates to Date object
+        	angular.forEach(premiumRequest.batches, function(batch) {
+            	 //console.log(batch);
+            	 
+            	 angular.forEach(batch.policies, function(policy) {
+            	 		console.log(policy.policyId);
+            	 		$scope.getPolicy(policy.policyId);
+
+
+            	 	
+            	 
+        		});
+
+        	});
+        	console.log($scope.data);
+    		
+    	}
+
+    	 $scope.getPolicy = function(id) {  
+              //Get Method
+              $http.get(apiUrl+"/policies/"+id).then(function(result) {
+         
+                
+                var policy ={
+			            insured: 1,
+			    		carrier : "String",
+			    		policyNro : "String",
+			            dueDate: new Date(),
+			            amountPayment: Math.random() * 10000,
+			            paymentDate: new Date(),
+			            amount: Math.random() * 10000,
+		        		};
+		       	//console.log(result.data);
+		       	console.log($scope.data);
+		        $scope.data.push(policy);
+
+
+
+              
+            }, function errorCallback(response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                console.log("error");
+          }).then( function(par){console.log("then :P",$scope.data) ;});
+          ;
+            
+        } 
+
+
+
+        } 
+	
+
+        $scope.getPremiumRequest(premiumRequestId);   
+
+      
+        
+  	});
+    }]);
+
+
+
+
+    
+
+
+
+
+
+
+	//Before Submit
+
+    camForm.on('submit', function(evt) {
+        // this callback is executed when the form is submitted, *before* the submit request to
+        // the server is executed
+        // creating a new variable will add it to the form submit
+
+        console.log("submited");
+      });
+
+
+
+
+</script>
+
+</form>

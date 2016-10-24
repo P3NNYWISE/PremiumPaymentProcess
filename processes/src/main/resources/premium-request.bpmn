@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.2.2">
+  <bpmn:collaboration id="Collaboration_00xp3di">
+    <bpmn:participant id="Participant_1yrudrk" name="Premium Request&#10;" processRef="Process_1" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_1" name="Premium Request" isExecutable="true">
+    <bpmn:laneSet>
+      <bpmn:lane id="Lane_1jt0vd5" name="Analyst">
+        <bpmn:flowNodeRef>ExclusiveGateway_1lc2dd4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>validatePaymentInstructions</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_09cq314</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>sendPaymentInstructions</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_1ysynrt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>confirmPayments</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>premiumRequestStart</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>premiumPayByAccounting</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>createPaymentInstructions</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:sequenceFlow id="SequenceFlow_07r4n3t" sourceRef="premiumRequestStart" targetRef="createPaymentInstructions" />
+    <bpmn:sequenceFlow id="SequenceFlow_19wnojm" name="No Borrower" sourceRef="ExclusiveGateway_1lc2dd4" targetRef="sendPaymentInstructions">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[${state.approved == true && state.paymentAgentId != 1}]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0y3jzql" sourceRef="createPaymentInstructions" targetRef="validatePaymentInstructions" />
+    <bpmn:sequenceFlow id="SequenceFlow_0bdkpsj" sourceRef="validatePaymentInstructions" targetRef="ExclusiveGateway_1lc2dd4" />
+    <bpmn:sequenceFlow id="SequenceFlow_13vkqng" sourceRef="sendPaymentInstructions" targetRef="confirmPayments" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway_1lc2dd4">
+      <bpmn:incoming>SequenceFlow_0bdkpsj</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_19wnojm</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1xlpswz</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1k6esps</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="validatePaymentInstructions" name="Validate the Payment Instructions" camunda:formKey="embedded:app:premium-request/02-validate.html">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="com.northstarlife.servicing.ValidateInstructionsListener" event="end" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0y3jzql</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0bdkpsj</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1xlpswz" name="Cancel" sourceRef="ExclusiveGateway_1lc2dd4" targetRef="EndEvent_1ysynrt" />
+    <bpmn:sequenceFlow id="SequenceFlow_112kf5n" sourceRef="confirmPayments" targetRef="EndEvent_09cq314" />
+    <bpmn:endEvent id="EndEvent_09cq314" name="Payment Confirmation">
+      <bpmn:incoming>SequenceFlow_112kf5n</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0ycdgpy</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="sendPaymentInstructions" name="Send Payment Instructions to SI" camunda:class="com.northstarlife.servicing.SendPaymentInstructionsService">
+      <bpmn:incoming>SequenceFlow_19wnojm</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_13vkqng</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EndEvent_1ysynrt">
+      <bpmn:incoming>SequenceFlow_1xlpswz</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="confirmPayments" name="Confirm Batch Payment" camunda:formKey="embedded:app:premium-request/03-confirm-batch.html">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="com.northstarlife.servicing.ConfirmBatchPaymentListener" event="end" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_13vkqng</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_112kf5n</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics camunda:collection="${state.getBatchPayments()}" camunda:elementVariable="batch" />
+    </bpmn:userTask>
+    <bpmn:startEvent id="premiumRequestStart" name="Premium Request&#10;Start Form" camunda:formKey="embedded:app:premium-request/01-start.html">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="com.northstarlife.servicing.PremiumRequestStartListener" event="end" />
+      </bpmn:extensionElements>
+      <bpmn:outgoing>SequenceFlow_07r4n3t</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1k6esps" name="Borrower" sourceRef="ExclusiveGateway_1lc2dd4" targetRef="premiumPayByAccounting">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[${state.approved == true && state.paymentAgentId == 1}]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0ycdgpy" sourceRef="premiumPayByAccounting" targetRef="EndEvent_09cq314" />
+    <bpmn:callActivity id="premiumPayByAccounting" name="Pay By Accounting" calledElement="premiumPayByAccounting">
+      <bpmn:extensionElements>
+        <camunda:in source="batchList" target="batchList" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1k6esps</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0ycdgpy</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:serviceTask id="createPaymentInstructions" name="Create Payment Instructions" camunda:class="com.northstarlife.servicing.CreateInstructionsService">
+      <bpmn:incoming>SequenceFlow_07r4n3t</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0y3jzql</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_00xp3di">
+      <bpmndi:BPMNShape id="Participant_1yrudrk_di" bpmnElement="Participant_1yrudrk">
+        <dc:Bounds x="115" y="106" width="1190" height="444" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1jt0vd5_di" bpmnElement="Lane_1jt0vd5">
+        <dc:Bounds x="145" y="106" width="1160" height="444" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0zst7x0_di" bpmnElement="premiumRequestStart">
+        <dc:Bounds x="237" y="275" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="210" y="311" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_07r4n3t_di" bpmnElement="SequenceFlow_07r4n3t">
+        <di:waypoint xsi:type="dc:Point" x="273" y="293" />
+        <di:waypoint xsi:type="dc:Point" x="389" y="293" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="286" y="268" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="SendTask_02eprjd_di" bpmnElement="sendPaymentInstructions">
+        <dc:Bounds x="852" y="253" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1lc2dd4_di" bpmnElement="ExclusiveGateway_1lc2dd4" isMarkerVisible="true">
+        <dc:Bounds x="742" y="268" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="722" y="318" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_19wnojm_di" bpmnElement="SequenceFlow_19wnojm">
+        <di:waypoint xsi:type="dc:Point" x="792" y="293" />
+        <di:waypoint xsi:type="dc:Point" x="852" y="293" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="761.7945205479452" y="238" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0y3jzql_di" bpmnElement="SequenceFlow_0y3jzql">
+        <di:waypoint xsi:type="dc:Point" x="489" y="293" />
+        <di:waypoint xsi:type="dc:Point" x="569" y="293" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="484" y="268" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0bdkpsj_di" bpmnElement="SequenceFlow_0bdkpsj">
+        <di:waypoint xsi:type="dc:Point" x="669" y="293" />
+        <di:waypoint xsi:type="dc:Point" x="742" y="293" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="660.5" y="268" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_178khfs_di" bpmnElement="validatePaymentInstructions">
+        <dc:Bounds x="569" y="253" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_13vkqng_di" bpmnElement="SequenceFlow_13vkqng">
+        <di:waypoint xsi:type="dc:Point" x="952" y="293" />
+        <di:waypoint xsi:type="dc:Point" x="1031" y="293" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="946.5" y="268" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_1ysynrt_di" bpmnElement="EndEvent_1ysynrt">
+        <dc:Bounds x="884" y="139" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="857" y="175" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1xlpswz_di" bpmnElement="SequenceFlow_1xlpswz">
+        <di:waypoint xsi:type="dc:Point" x="767" y="268" />
+        <di:waypoint xsi:type="dc:Point" x="767" y="157" />
+        <di:waypoint xsi:type="dc:Point" x="884" y="157" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="737" y="203" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1504qfx_di" bpmnElement="createPaymentInstructions">
+        <dc:Bounds x="389" y="253" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_112kf5n_di" bpmnElement="SequenceFlow_112kf5n">
+        <di:waypoint xsi:type="dc:Point" x="1131" y="293" />
+        <di:waypoint xsi:type="dc:Point" x="1208" y="293" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1124.5" y="268" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_18xd6so_di" bpmnElement="EndEvent_09cq314">
+        <dc:Bounds x="1208" y="275" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1181" y="311" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_0lavug8_di" bpmnElement="confirmPayments">
+        <dc:Bounds x="1031" y="253" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1k6esps_di" bpmnElement="SequenceFlow_1k6esps">
+        <di:waypoint xsi:type="dc:Point" x="767" y="318" />
+        <di:waypoint xsi:type="dc:Point" x="767" y="437" />
+        <di:waypoint xsi:type="dc:Point" x="935" y="437" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="753" y="366.46521739130435" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0ycdgpy_di" bpmnElement="SequenceFlow_0ycdgpy">
+        <di:waypoint xsi:type="dc:Point" x="1035" y="437" />
+        <di:waypoint xsi:type="dc:Point" x="1226" y="437" />
+        <di:waypoint xsi:type="dc:Point" x="1226" y="311" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1085.5" y="412" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="CallActivity_19kk8ma_di" bpmnElement="premiumPayByAccounting">
+        <dc:Bounds x="935" y="398" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

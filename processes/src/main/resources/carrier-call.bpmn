@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.3.2">
+  <bpmn:collaboration id="Collaboration_0r61kph">
+    <bpmn:participant id="Participant_0lon9ii" name="Carrier Call" processRef="Process_1ttllbn" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_1ttllbn" name="Carrier Call" isExecutable="true">
+    <bpmn:sequenceFlow id="SequenceFlow_1t0ays4" sourceRef="Task_067mq2t" targetRef="Task_0yv11en" />
+    <bpmn:subProcess id="Task_0yv11en" name="Call Each Carrier and Record">
+      <bpmn:incoming>SequenceFlow_1t0ays4</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_00hv81m</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics camunda:collection="policiesPerGroup" camunda:elementVariable="groupedPolicies" />
+      <bpmn:dataStoreReference id="DataStoreReference_0ppfgbg" name="Updated Premium&#10;Policies" />
+      <bpmn:userTask id="Task_1p1ksp0" name="Load new policies values">
+        <bpmn:extensionElements>
+          <camunda:executionListener class="com.northstarlife.servicing.carriercalls.LoadedNewValuesListener" event="end" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1ejwf3o</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_1qnw28j</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_04yay2r</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway_1i5m51j">
+        <bpmn:incoming>SequenceFlow_160yamd</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0a4d2f1</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow_1qnw28j</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="EndEvent_0ufe49v">
+        <bpmn:incoming>SequenceFlow_0a4d2f1</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_04yay2r" sourceRef="Task_1p1ksp0" targetRef="Task_1ttoefw" />
+      <bpmn:sequenceFlow id="SequenceFlow_0a4d2f1" sourceRef="ExclusiveGateway_1i5m51j" targetRef="EndEvent_0ufe49v" />
+      <bpmn:sequenceFlow id="SequenceFlow_1qnw28j" name="Have failed streams?" sourceRef="ExclusiveGateway_1i5m51j" targetRef="Task_1p1ksp0">
+        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">{{ haveFailedStream == true }}</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+      <bpmn:startEvent id="StartEvent_1ngrg0b">
+        <bpmn:outgoing>SequenceFlow_1ejwf3o</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_1ejwf3o" sourceRef="StartEvent_1ngrg0b" targetRef="Task_1p1ksp0" />
+      <bpmn:sequenceFlow id="SequenceFlow_160yamd" sourceRef="Task_1ttoefw" targetRef="ExclusiveGateway_1i5m51j" />
+      <bpmn:serviceTask id="Task_1ttoefw" name="Create Premium Requirements" camunda:class="com.northstarlife.servicing.carriercalls.CreatePremiumRequestsService">
+        <bpmn:incoming>SequenceFlow_04yay2r</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_160yamd</bpmn:outgoing>
+        <bpmn:dataOutputAssociation id="DataOutputAssociation_1ysjsqb">
+          <bpmn:targetRef>DataStoreReference_0ppfgbg</bpmn:targetRef>
+        </bpmn:dataOutputAssociation>
+      </bpmn:serviceTask>
+      <bpmn:textAnnotation id="TextAnnotation_0jtjflj">      <bpmn:text>If issue, put state back to Pending</bpmn:text>
+</bpmn:textAnnotation>
+      <bpmn:association id="Association_1qzkcg9" sourceRef="Task_1ttoefw" targetRef="TextAnnotation_0jtjflj" />
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="SequenceFlow_00hv81m" sourceRef="Task_0yv11en" targetRef="EndEvent_0g4uwkh" />
+    <bpmn:endEvent id="EndEvent_0g4uwkh">
+      <bpmn:incoming>SequenceFlow_00hv81m</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Task_067mq2t" name="Retrieve Grouped Pending Policies per Carrier" camunda:class="com.northstarlife.servicing.carriercalls.RetrieveGroupedCarrierPoliciesService">
+      <bpmn:incoming>SequenceFlow_1b6eqbj</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1t0ays4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1b6eqbj" sourceRef="IntermediateThrowEvent_0afu9vy" targetRef="Task_067mq2t" />
+    <bpmn:startEvent id="IntermediateThrowEvent_0afu9vy" name="Weekly">
+      <bpmn:outgoing>SequenceFlow_1b6eqbj</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:association id="Association_0wgttkj" sourceRef="Task_067mq2t" targetRef="TextAnnotation_0ez35t9" />
+    <bpmn:textAnnotation id="TextAnnotation_0ez35t9">    <bpmn:text><![CDATA[PremiumRequestPolicies con Status = 'pending']]></bpmn:text>
+</bpmn:textAnnotation>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_0r61kph">
+      <bpmndi:BPMNShape id="Participant_0lon9ii_di" bpmnElement="Participant_0lon9ii">
+        <dc:Bounds x="-45" y="165" width="1418" height="493" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataStoreReference_0ppfgbg_di" bpmnElement="DataStoreReference_0ppfgbg">
+        <dc:Bounds x="591" y="495" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="573" y="550" width="89" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1t0ays4_di" bpmnElement="SequenceFlow_1t0ays4">
+        <di:waypoint xsi:type="dc:Point" x="286" y="407" />
+        <di:waypoint xsi:type="dc:Point" x="365" y="407" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="326" y="392" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOutputAssociation_1ysjsqb_di" bpmnElement="DataOutputAssociation_1ysjsqb">
+        <di:waypoint xsi:type="dc:Point" x="693" y="405" />
+        <di:waypoint xsi:type="dc:Point" x="622" y="495" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_02vea4f_di" bpmnElement="Task_1p1ksp0">
+        <dc:Bounds x="534" y="325" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0ufe49v_di" bpmnElement="EndEvent_0ufe49v">
+        <dc:Bounds x="986" y="347" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1004" y="383" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_04yay2r_di" bpmnElement="SequenceFlow_04yay2r">
+        <di:waypoint xsi:type="dc:Point" x="634" y="365" />
+        <di:waypoint xsi:type="dc:Point" x="676" y="365" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="610" y="340" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1i5m51j_di" bpmnElement="ExclusiveGateway_1i5m51j" isMarkerVisible="true">
+        <dc:Bounds x="818" y="340" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="798" y="390" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0a4d2f1_di" bpmnElement="SequenceFlow_0a4d2f1">
+        <di:waypoint xsi:type="dc:Point" x="868" y="365" />
+        <di:waypoint xsi:type="dc:Point" x="986" y="365" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="927" y="350" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1qnw28j_di" bpmnElement="SequenceFlow_1qnw28j">
+        <di:waypoint xsi:type="dc:Point" x="843" y="340" />
+        <di:waypoint xsi:type="dc:Point" x="843" y="257" />
+        <di:waypoint xsi:type="dc:Point" x="573" y="257" />
+        <di:waypoint xsi:type="dc:Point" x="573" y="325" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="753" y="254.0167356144106" width="59" height="24" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="SubProcess_1pf7t2r_di" bpmnElement="Task_0yv11en" isExpanded="true">
+        <dc:Bounds x="365" y="189" width="868" height="436" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1ngrg0b_di" bpmnElement="StartEvent_1ngrg0b">
+        <dc:Bounds x="424.7290640394089" y="347.36699507389164" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="397.7290640394089" y="383.36699507389164" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1ejwf3o_di" bpmnElement="SequenceFlow_1ejwf3o">
+        <di:waypoint xsi:type="dc:Point" x="461" y="365" />
+        <di:waypoint xsi:type="dc:Point" x="534" y="365" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="452.5" y="340" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_160yamd_di" bpmnElement="SequenceFlow_160yamd">
+        <di:waypoint xsi:type="dc:Point" x="776" y="365" />
+        <di:waypoint xsi:type="dc:Point" x="818" y="365" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="752" y="340" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1nm5qee_di" bpmnElement="Task_1ttoefw">
+        <dc:Bounds x="676" y="325" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_02udtv8_di" bpmnElement="Task_067mq2t">
+        <dc:Bounds x="186" y="367" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0g4uwkh_di" bpmnElement="EndEvent_0g4uwkh">
+        <dc:Bounds x="1312.729064039409" y="389" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1285.729064039409" y="425" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_00hv81m_di" bpmnElement="SequenceFlow_00hv81m">
+        <di:waypoint xsi:type="dc:Point" x="1233" y="407" />
+        <di:waypoint xsi:type="dc:Point" x="1313" y="407" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1273" y="392" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1b6eqbj_di" bpmnElement="SequenceFlow_1b6eqbj">
+        <di:waypoint xsi:type="dc:Point" x="119" y="407" />
+        <di:waypoint xsi:type="dc:Point" x="186" y="407" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="153" y="392" width="0" height="0" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_1qgy1bn_di" bpmnElement="IntermediateThrowEvent_0afu9vy">
+        <dc:Bounds x="83" y="389" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="83" y="425" width="36" height="13" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0jtjflj_di" bpmnElement="TextAnnotation_0jtjflj">
+        <dc:Bounds x="804" y="497" width="197" height="63" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_1qzkcg9_di" bpmnElement="Association_1qzkcg9">
+        <di:waypoint xsi:type="dc:Point" x="768" y="403" />
+        <di:waypoint xsi:type="dc:Point" x="868" y="497" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_0ez35t9_di" bpmnElement="TextAnnotation_0ez35t9">
+        <dc:Bounds x="137" y="205" width="172" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0wgttkj_di" bpmnElement="Association_0wgttkj">
+        <di:waypoint xsi:type="dc:Point" x="233" y="367" />
+        <di:waypoint xsi:type="dc:Point" x="226" y="285" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,428 @@
+   
+  <form role="form" name="PremiumRequestForm">
+      
+  <!-- Client Group -->
+  <div class="form-group row">
+    <label class= "col-sm-3" for="clientGroupSelect">Client Group</label>
+    <div class="col-sm-9">
+      <select chosen   style="width:80%"
+        name ="clientGroupSelect"
+        type="String"
+        ng-model="selectedClientGroup"
+        
+        ng-change="clientGroupUpdated()"
+          ng-options="client.name group by client.groupType  for client in clientGroup" required> 
+          <option></option>
+       </select>  
+        </div>
+  </div>    
+     
+   <!-- Payment Agent -->
+      <div class="form-group row">
+    <label class= "col-sm-3" for="paymentAgentSelect">Payment Agent</label>
+    <div class="col-sm-9">
+      <select chosen  style="width:80%" 
+      name ="paymentAgentSelect" 
+      type="String"
+      ng-model="selectedPaymentAgent"
+      ng-options="agent.name for agent in paymentAgents">
+      <option></option>            
+       </select>  
+     </div>
+   </div>      
+
+  <!-- Batch Process -->
+  <div class="form-group row">
+      
+    <label  class= "col-sm-3" for="batchProcessSelect">Batch Process</label>
+    <div class="col-sm-9">
+      <select chosen  style="width:80%"
+        name ="batchProcessSelect"
+        type="String"
+        ng-model="selectedBatchProcess"
+        data-placeholder="Pick one of these" 
+        ng-options="process.name  for process in batchProcess  | filter: {name: selectedClientGroup.name}">
+        <option></option> 
+       </select>  
+     </div> 
+  </div>
+    
+
+
+    <!-- from date -->
+<div class="row">
+    <div class="form-group col-sm-6">
+    <div class="row">
+    <label   class="col-sm-6" for="premiumRequestPaymentDate">From</label>
+  <p class="input-group col-sm-6">  
+  <input type="text"
+       name="premiumRequestPaymentDate"       
+       class="form-control"
+       ng-model="fromDateSelected"
+       ng-change="premiumRequestfromDateUpdated()"
+       datepicker-popup= "MM-dd-yyyy"
+       placeholder="MM-dd-yyyy"
+       is-open="fromdateFieldOpened" />
+
+  <span class="input-group-btn">
+    <button type="button"
+            class="btn btn-default" 
+            ng-click="from_open($event)">
+      <i class="glyphicon glyphicon-calendar"></i>
+    </button>
+  </span>
+  
+  </p>
+
+  
+</div>
+</div>
+    
+    <!-- to date -->
+    <div class="form-group col-sm-6">
+    <div class="row">
+    <label class="col-sm-2" for="premiumRequestToDate">To</label>
+  <p class="input-group col-sm-6">
+  <input type="text"
+       name="premiumRequestToDate"
+       
+       class="form-control"
+          ng-model="toDateSelected"
+       datepicker-popup="MM-dd-yyyy"
+       placeholder="MM-dd-yyyy"
+       is-open="todateFieldOpened" />
+
+  <span class="input-group-btn">
+    <button type="button"
+            class="btn btn-default"
+            ng-click="to_open($event)">
+      <i class="glyphicon glyphicon-calendar"></i>
+    </button>
+  </span>
+  </p>
+</div>
+</div>
+</div>
+     
+  
+    <!-- Amount  Process -->
+  <div class="form-group row">
+    <label  class= "col-sm-3" for="amountOfFilesSelect">Amount of Files</label>
+    <div class="col-sm-9">
+      <select chosen  style="width:80%"
+        name ="amountOfFilesSelect"
+        type="String"
+        ng-model="selectedAmountOfFiles"
+        ng-options="amount.name for amount in amountOfFiles"> 
+        <option></option>
+       </select>  
+     </div> 
+  </div>
+
+
+    <!-- Payment Date -->
+<div class="form-group row">
+  <label  class= "col-sm-3" for="paymentDateSelect">Payment Date</label>
+    <div class="col-sm-7">
+<table  ng-if= "selectedClientGroup" class="table" >
+<tr >
+    <td >     
+
+    <!-- Payment date -->
+  <p class="input-group">
+  <input type="text"
+       name="paymentDate"
+       
+       class="form-control"
+          ng-model="paymentDates[0]"
+       datepicker-popup="MM-dd-yyyy"
+       placeholder="MM-dd-yyyy"
+       is-open="$parent.paymentdate0FieldOpened" />
+
+  <span class="input-group-btn">
+    <button type="button"
+            class="btn btn-default"
+            ng-click="paymentdate0_open($event)">
+      <i class="glyphicon glyphicon-calendar"></i>
+    </button>
+  </span>
+  </p>
+
+
+
+    </td>
+</tr>
+
+
+<tr ng-if= "vivaGroupSelected">
+<td >     
+
+    <!-- Payment date -->
+    
+  <p class="input-group">
+  
+  
+  <input type="text"
+       name="paymentDate"
+       
+       class="form-control"
+          ng-model="paymentDates[1]"
+       datepicker-popup="MM-dd-yyyy"
+       placeholder="MM-dd-yyyy"
+       is-open="$parent.paymentdate1FieldOpened" />
+
+  <span class="input-group-btn">
+    <button type="button"
+            class="btn btn-default"
+            ng-click="paymentdate1_open($event)">
+      <i class="glyphicon glyphicon-calendar"></i>
+    </button>
+  </span>
+  </p>
+
+  </td>
+</tr>
+<tr ng-if= "vivaGroupSelected">
+<td >    
+    <!-- Payment date -->
+  <p class="input-group">
+  <input type="text"
+       name="paymentDate"
+       
+       class="form-control"
+          ng-model="paymentDates[2]"
+       datepicker-popup="MM-dd-yyyy"
+       placeholder="MM-dd-yyyy"
+       is-open="$parent.paymentdate2FieldOpened" />
+
+  <span class="input-group-btn">
+    <button type="button"
+            class="btn btn-default"
+            ng-click="paymentdate2_open($event)">
+      <i class="glyphicon glyphicon-calendar"></i>
+    </button>
+  </span>
+  </p>
+
+
+    </td>
+</tr>
+<tr ng-if= "vivaGroupSelected">
+<td >
+    <!-- Payment date -->
+    
+  <p class="input-group">
+  
+  
+  <input type="text"
+       name="paymentDate"
+       
+       class="form-control"
+          ng-model="paymentDates[3]"
+       datepicker-popup="MM-dd-yyyy"
+       placeholder="MM-dd-yyyy"
+       is-open="$parent.paymentdate3FieldOpened" />
+
+  <span class="input-group-btn">
+    <button type="button"
+            class="btn btn-default"
+            ng-click="paymentdate3_open($event)">
+      <i class="glyphicon glyphicon-calendar"></i>
+    </button>
+  </span>
+  </p>
+
+  
+ </td>
+</tr>
+
+
+</table>
+   </div> 
+</div>
+
+
+  <!-- Check as PDF --> 
+    <div class="form-group row">
+      <label class="col-sm-3" for="check_as_pdf">Present Checks As PDFs</label>
+      <div class="col-sm-9">
+    <input class="pull-left"  type="checkbox"
+        name="check_as_pdf"
+         ng-model="state.checkAsPdf"
+         />
+   </div>
+   </div>
+
+  <script cam-script type="text/form-script">
+
+   //Angular Datepicker
+    $scope.from_open = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation();
+        $scope.fromdateFieldOpened = true;    
+      };
+    $scope.to_open = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation(); 
+        $scope.todateFieldOpened = true;
+      };
+     $scope.paymentdate0_open = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation(); 
+        $scope.paymentdate0FieldOpened = true;
+    };
+    $scope.paymentdate1_open = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation(); 
+        $scope.paymentdate1FieldOpened = true;
+    };
+    $scope.paymentdate2_open = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation(); 
+        $scope.paymentdate2FieldOpened = true;
+    };
+    $scope.paymentdate3_open = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation(); 
+        $scope.paymentdate3FieldOpened = true;
+    }
+
+    var state = $scope.state = {
+      paymentDates : []
+    };
+    
+    // APIs Calls On form load
+    inject([ '$scope', '$http', function($scope, $http) {
+        camForm.on('form-loaded', function() {
+          // use injected $http service for making requests   
+
+  	  camForm.variableManager.createVariable({
+          name: 'state',
+          type: 'Object',
+          value: state,
+          valueInfo: {
+            // indicate that object is serialized as json
+            serializationDataFormat: 'application/json',
+            // provide classname of java object
+            objectTypeName: 'com.northstarlife.servicing.PremiumRequestProcessState'
+          }
+        });
+
+        $scope.getClients = function() {  
+          //Get Method
+          $http.get("http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/client-groups").then(function(result) {
+          
+              $scope.clientGroup= result.data;
+          
+            }, function errorCallback(response) {
+              // called asynchronously if an error occurs
+              // or server returns response with an error status.
+              console.log("error");
+          });
+        } 
+        $scope.getPaymentDates = function(current_date , count,workable_days) {  
+          //Get Method
+          $http.get("http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/premium-requests/payment-dates").then(function(result) {
+                    $scope.paymentDates= []
+                    // Convert String  to Date
+                    angular.forEach(result.data, function(date) {
+                      $scope.paymentDates.push( new Date(date));
+                    });
+            }, function errorCallback(response) {
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                    console.log("error");                   
+          });
+        } 
+
+        $scope.getClients();
+        });
+      }]);
+
+
+    
+    
+    //On Client Group Select
+    $scope.clientGroupUpdated = function() {
+      $scope.paymentAgents=[$scope.selectedClientGroup.paymentAgent];
+      $scope.selectedPaymentAgent=$scope.paymentAgents[0];
+
+      //$scope.paymentDates =[];
+    
+      
+      //if client Group Selected  "viva"
+      if ($scope.selectedClientGroup.name.includes("VIVA")){
+            $scope.amountOfFiles=[{"name":"4 Payment File","value": 4}];
+            $scope.vivaGroupSelected=true;
+      } else{
+            $scope.amountOfFiles=[{"name":"1 Payment File","value":1}];    
+            $scope.vivaGroupSelected=false;
+
+      };
+      $scope.getPaymentDates( $scope.parseDate(new Date()) ,$scope.amountOfFiles[0].value , 5);
+      $scope.selectedAmountOfFiles=$scope.amountOfFiles[0];
+      $scope.selectedBatchProcess=$scope.batchProcess[0];
+      
+    } 
+
+    $scope.parseDate = function(date){
+          var month = parseInt(date.getMonth())+1;
+          var parse_date = month+"/"+date.getDate()+"/"+date.getFullYear();
+          return parse_date;
+
+    }
+    //On Premium Request From Date select
+    $scope.premiumRequestfromDateUpdated = function() {
+          $scope.getPaymentDates( $scope.parseDate($scope.fromDateSelected), $scope.amountOfFiles[0].value , 5);
+    }
+
+
+    //Json Data
+    $scope.batchProcess=[{"name":"Fortress 15th (Covers 1-15th)" ,"clientGroup":"Fortress"},
+    {"name":"Fortress 30th (Covers 16-31st)" , "clientGroup":"Fortress"},
+    {"name":"NCB 30th (Covers 1-15th)" , "clientGroup":"NCB"},
+    {"name":"NCB 15th (Covers 16-31st)" , "clientGroup":"NCB"},
+    {"name":"VIVA WF Financed 21st (Covers 16-15th)" , "clientGroup":"VIVA"},
+    {"name":"VIVA WF (Katz) 30th" , "clientGroup":"VIVA"},
+    {"name":"VIVA WT 30th (Covers 16-15th)" , "clientGroup":"VIVA"},
+    {"name":"IBB (Zeller) 30th" , "clientGroup":"IBB"},
+    {"name":"Centurion Service 10th (Covers 1-31st)" , "clientGroup":"Centurion" },
+    {"name":"Del Mar 15th" , "clientGroup":"Del Mar"},
+    {"name":"KnightBrook 15th" , "clientGroup":"KnightBrook"},
+    ];
+
+
+      
+    //Before Submit
+    var variableManager = camForm.variableManager;
+       camForm.on('submit', function(evt) {
+        // this callback is executed when the form is submitted, *before* the submit request to
+        // the server is executed
+        // creating a new variable will add it to the form submit
+
+        //state.clientGroupId=$scope.selectedClientGroup.id;
+        state.clientGroupId= 1;
+        state.amountOfFiles =$scope.selectedAmountOfFiles.value;
+        //state.paymentAgentId = $scope.selectedPaymentAgent.id;
+        state.paymentAgentId = 2;
+        state.startDate   = $scope.fromDateSelected;
+        state.endDate   = $scope.toDateSelected;
+      
+
+        // Convert String Dates to Date object
+        angular.forEach($scope.paymentDates, function(addr) {
+             state.paymentDates.push(new Date(addr));
+        });
+        
+
+      })
+
+  </script>
+  </form>
+
+
+
+
+
+
+
