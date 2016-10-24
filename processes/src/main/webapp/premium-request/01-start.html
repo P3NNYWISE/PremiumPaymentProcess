@@ -400,11 +400,9 @@
         // the server is executed
         // creating a new variable will add it to the form submit
 
-        //state.clientGroupId=$scope.selectedClientGroup.id;
-        state.clientGroupId= 1;
+        state.clientGroupId=$scope.selectedClientGroup.id;
         state.amountOfFiles =$scope.selectedAmountOfFiles.value;
-        //state.paymentAgentId = $scope.selectedPaymentAgent.id;
-        state.paymentAgentId = 2;
+        state.paymentAgentId = $scope.selectedPaymentAgent.id;
         state.startDate   = $scope.fromDateSelected;
         state.endDate   = $scope.toDateSelected;
       
@@ -413,7 +411,6 @@
         angular.forEach($scope.paymentDates, function(addr) {
              state.paymentDates.push(new Date(addr));
         });
-        
 
       })
 

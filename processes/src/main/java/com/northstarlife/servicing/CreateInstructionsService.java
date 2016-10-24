@@ -28,34 +28,23 @@ public class CreateInstructionsService implements JavaDelegate {
 		PremiumRequestProcessState state = (PremiumRequestProcessState) execution.getVariable("state");
 
 		// Here we can get the variables from the step and apply to the object if the form did not already directly updated it.
-		//state.setApproved(true);
-		//state.setPaymentAgentId(2);
+		//Set default approved
+		state.setApproved(false);
 		
 		// We should now call the API to create the instructions
 		// TODO
 
 
-		//Api Use Example
-		ClientGroupsApi api = new ClientGroupsApi();
-		
-		api.getApiClient().setBasePath("http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/slx-api/v1");
-		
-		List<ClientGroup> response = api.listClientGroups();
-        for (ClientGroup clientGroups : response) {
-        	Utils.Log.info(">>> " + clientGroups.toString());
-		}
-
 
 		//create Api Instance
 		PremiumRequestsApi apiInstance = new PremiumRequestsApi();
-		apiInstance.getApiClient().setBasePath("http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io");
+		apiInstance.getApiClient().setBasePath("http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/slx-api/v1");
 		
 		//Add Premium Request
 		Premiumrequestinput body = new Premiumrequestinput(); 
 		// Build Premiumrequestinput 
 
 		body.setClientGroupId(state.getClientGroupId()	);
-
 
 		// Convert Data types TODO
 		LocalDate today = LocalDate.now();
@@ -65,13 +54,12 @@ public class CreateInstructionsService implements JavaDelegate {
 		body.setTo(today);
 		body.setCheckAsPDF(state.getCheckAsPdf());
 		for (Date paymentDate : state.getPaymentDates()) {
-        	Utils.Log.info(">>> " + paymentDate);
         	//body.addPaymentDatesItem(paymentDate);
         	body.addPaymentDatesItem(today);
-
 		}
 		
 		Utils.Log.info(">>> " + body);
+		
 		try {
 		    PremiumRequest result = apiInstance.addPremiumRequest(body);
 		    
@@ -81,11 +69,11 @@ public class CreateInstructionsService implements JavaDelegate {
 		    Utils.Log.info(">>> Exception when calling PremiumRequestsApi#addPremiumRequest");
 		    e.printStackTrace();
 		}
-		
+	/*
 		//Get Premium Request
-		
+
 		String id = "1"; // String | 
-		Boolean includePolicyDetail = true; // Boolean | 
+		Boolean includePolicyDetail = false; // Boolean | 
 		try {
 			    PremiumRequest result = apiInstance.getPremiumRequest(id, includePolicyDetail);
 			    Utils.Log.info(">>> " + result);
@@ -96,11 +84,10 @@ public class CreateInstructionsService implements JavaDelegate {
 			    e.printStackTrace();
 		}
 		
+		*/    
 		    
-		    
-	
 
-		
+
 
 
 		
@@ -115,9 +102,6 @@ public class CreateInstructionsService implements JavaDelegate {
 		execution.setVariable("state", state);
 		
 
-		Utils.Log.info(state.getPaymentAgentId()) ;
-		Utils.Log.info(state.getClientGroupId());
-		Utils.Log.info(state.getStartDate().toString());
 
 		
 		Utils.Log.info("Created Instructions");

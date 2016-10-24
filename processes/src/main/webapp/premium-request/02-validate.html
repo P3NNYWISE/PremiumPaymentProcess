@@ -10,18 +10,18 @@
   initialized="initGrid(s,e)"
 
     >
-    <wj-flex-grid-column header="Client" binding="client" ></wj-flex-grid-column>
-    <wj-flex-grid-column header="Group" binding="group"></wj-flex-grid-column>
+    <wj-flex-grid-column header="Client" binding="client"  is-required="true" ></wj-flex-grid-column>
+    <wj-flex-grid-column header="Group" binding="group"  is-required="true" ></wj-flex-grid-column>
     <wj-flex-grid-column header="Payment File" binding="paymentFile"></wj-flex-grid-column>
-    <wj-flex-grid-column header="Insured" binding="insured"></wj-flex-grid-column>
-    <wj-flex-grid-column header="Carrier" binding="carrier"></wj-flex-grid-column>
-    <wj-flex-grid-column header="Policy" binding="policy"></wj-flex-grid-column>
-    <wj-flex-grid-column header="Due Date" binding="dueDate"></wj-flex-grid-column>
-    <wj-flex-grid-column header="Premium Amount" binding="premiumAmount" format="n2" aggregate="Sum" ></wj-flex-grid-column>
-    <wj-flex-grid-column header="Disbursement Type" binding="disbursementType"></wj-flex-grid-column>
-    <wj-flex-grid-column header="Antipated Payment" binding="anticipatedPayment"></wj-flex-grid-column>
-    <wj-flex-grid-column header="Owner" binding="owner"></wj-flex-grid-column>
-    <wj-flex-grid-column header="Wire Instrucction" binding="Carrier"></wj-flex-grid-column>
+    <wj-flex-grid-column header="Insured" binding="insured"  is-required="false" ></wj-flex-grid-column>
+    <wj-flex-grid-column header="Carrier" binding="carrier"  is-required="false" ></wj-flex-grid-column>
+    <wj-flex-grid-column header="Policy" binding="policy"  is-required="false" ></wj-flex-grid-column>
+    <wj-flex-grid-column header="Due Date" binding="dueDate"  is-required="false" ></wj-flex-grid-column>
+    <wj-flex-grid-column header="Premium Amount" binding="premiumAmount" format="n2" aggregate="Sum"  is-required="false" ></wj-flex-grid-column>
+    <wj-flex-grid-column header="Disbursement Type" binding="disbursementType"  is-required="false" ></wj-flex-grid-column>
+    <wj-flex-grid-column header="Antipated Payment" binding="anticipatedPayment"  is-required="false" ></wj-flex-grid-column>
+    <wj-flex-grid-column header="Owner" binding="owner"  is-required="false" ></wj-flex-grid-column>
+    <wj-flex-grid-column header="Wire Instrucction" binding="Carrier"  is-required="false"></wj-flex-grid-column>
 
 
 
@@ -73,7 +73,7 @@
   <!-- Approved Reject--> 
     <div class="form-group row">
       <label class="col-sm-2" for="approved">Approved</label>
-      <div class="" ss="col-sm-10">
+      <div class="col-sm-10">
     <input class="pull-left"  type="checkbox"
         name="approved"
          ng-model="approved"
@@ -88,7 +88,7 @@
 
     //Var
     var groupBy = 'paymentFile';
-  var premiumRequestId = 2;
+
     var apiUrl = "http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/slx-api/v1 ";
    
     // add a footer row to the grid
@@ -125,17 +125,25 @@
   inject([ '$scope', '$http', '$filter', function($scope, $http , $filter) {
     camForm.on('variables-fetched', function() {
       // work with the variable (bind it to the current AngularJS $scope)
-      $scope.state = camForm.variableManager.variableValue('state');
+      	$scope.state = camForm.variableManager.variableValue('state');
+		//set 
+		$scope.approved=false;
+		//Request retrieve by the API - To Do
+		//var premiumRequestId = $scope.request ;
+  		var premiumRequestId = 2; 
          
 
         // Get Premium Request from the api , and populate the grid
-    $scope.getPremiumRequest = function(id) {  
+    	$scope.getPremiumRequest = function(id) {  
               //Get Method
               $http.get(apiUrl+"/premium-requests/"+id).then(function(result) {
-                //console.log(result.data);
+                console.log(result.data);
                 $scope.premiumRequest=result.data;
-                $scope.data = new wijmo.collections.CollectionView($scope.getData(result.data));
-                $scope.groupBy(groupBy);
+                //$scope.data = new wijmo.collections.CollectionView($scope.getData(result.data));
+				$scope.data = [];
+				$scope.getData(result.data);
+                //$scope.groupBy(groupBy);
+				$scope.data.refresh();
                 
               
             }, function errorCallback(response) {
@@ -145,38 +153,72 @@
           });
             
         } 
+      // Get Premium Request from the api , and populate the grid
+        $scope.getPolicies = function(id) {  
+              //Get Method
+              $http.get(apiUrl+"/policies/"+id).then(function(result) {
+                console.log(result.data);
+                $scope.policies=result.data;
+              	var batches = {"paymentFile": 1 ,
+                   		"insured":   " " , 
+                   		"carrier":"carrier", 
+                   		"policy": "",  
+                   		"dueDate":  new Date() , 
+                   		"premiumAmount": 0 ,
+                   		"disbursementType": "" , 
+                     	"anticipatedPayment":  new Date(),
+                  		"owner":   "" };
+            	$scope.data.push($.extend({}, $scope.header, batches));
+    			console.log($scope.data);
+                
+                
+              
+            }, function errorCallback(response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                console.log("error");
+          });
+            
+        }
 
             // get data to the Grid ,
             $scope.getData = function(premiumRequest) {
                 var data=[];
-                var header = {"client": premiumRequest.clientGroup.name ,
+                $scope.header = {"client": premiumRequest.clientGroup.name ,
                  "group": premiumRequest.clientGroup.groupType ,
         
                   };
         
             //get Batches data, and construct an json Array
             angular.forEach(premiumRequest.batches, function(batch) {
-          var i = $scope.state.amountOfFiles;
-          angular.forEach(batch.policies ,  function(p) {
-              var batches = {"paymentFile": i ,
-                   "insured":  p.policy.insured.name   , 
-                   "carrier": p.policy.carrier.name, 
-                   "policy": p.policyId,  
-                   "dueDate":  new Date(p.policy.premium.dueDate ) , 
-                   "premiumAmount": p.paymentAmount  ,
-                   "disbursementType": p.policy.carrier.disbursementType , 
-                     "anticipatedPayment":  new Date($scope.state.paymentDates[i-1]),
-                  "owner":   p.policy.owner.name };
-            data.push($.extend({}, header, batches));
-            i++;
-              });           
+          		var i = $scope.state.amountOfFiles;
+          		angular.forEach(batch.policies ,  function(p) {
+					
+					$scope.getPolicies(p.policyId );
+					
+
+            		i++;
+              	});           
             });
               return data;
             }
 
-    $scope.getPremiumRequest(premiumRequestId);        
+    	$scope.getPremiumRequest(premiumRequestId);        
     });
     }]);
+
+    //Before Submit
+       camForm.on('submit', function(evt) {
+        // this callback is executed when the form is submitted, *before* the submit request to
+        // the server is executed
+        // creating a new variable will add it to the form submit
+
+        $scope.state.approved   = $scope.approved;
+      	
+
+      })
+
+
 </script>
 
 </form>
