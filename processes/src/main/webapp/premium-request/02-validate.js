@@ -1,4 +1,5 @@
-   //Var
+
+    //Var
     var groupBy = 'paymentFile';
 
     var apiUrl = "http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/slx-api/v1 ";
@@ -37,22 +38,25 @@
   inject([ '$scope', '$http', '$filter', function($scope, $http , $filter) {
     camForm.on('variables-fetched', function() {
       // work with the variable (bind it to the current AngularJS $scope)
-      	$scope.state = camForm.variableManager.variableValue('state');
-		//set 
-		$scope.approved=false;
-		//Request retrieve by the API - To Do
-		//var premiumRequestId = $scope.request ;
-  		var premiumRequestId = 2; 
+        $scope.state = camForm.variableManager.variableValue('state');
+    //set 
+    $scope.approved=false;
+    //Request retrieve by the API - To Do
+    //var premiumRequestId = $scope.request ;
+      var premiumRequestId = 2; 
          
 
         // Get Premium Request from the api , and populate the grid
-        $scope.getPremiumRequest = function(id) {  
+      $scope.getPremiumRequest = function(id) {  
               //Get Method
               $http.get(apiUrl+"/premium-requests/"+id).then(function(result) {
-                //console.log(result.data);
+                console.log(result.data);
                 $scope.premiumRequest=result.data;
                 $scope.data = new wijmo.collections.CollectionView($scope.getData(result.data));
-                $scope.groupBy(groupBy);
+              //$scope.data = [];
+              //$scope.getData(result.data);
+                //$scope.groupBy(groupBy);
+              $scope.data.refresh();
                 
               
             }, function errorCallback(response) {
@@ -62,15 +66,24 @@
           });
             
         } 
-
-
-
       // Get Premium Request from the api , and populate the grid
         $scope.getPolicies = function(id) {  
               //Get Method
+              $scope.data=[]
               $http.get(apiUrl+"/policies/"+id).then(function(result) {
-                console.log( result.data);
+                console.log(result.data);
                 $scope.policies=result.data;
+                var batches = {"paymentFile": 1 ,
+                      "insured":   " " , 
+                      "carrier":"carrier", 
+                      "policy": "",  
+                      "dueDate":  new Date() , 
+                      "premiumAmount": 0 ,
+                      "disbursementType": "" , 
+                      "anticipatedPayment":  new Date(),
+                      "owner":   "" };
+              $scope.data.push($.extend({}, $scope.header, batches));
+              console.log($scope.data);
                 
                 
               
@@ -82,41 +95,28 @@
             
         }
 
-
             // get data to the Grid ,
             $scope.getData = function(premiumRequest) {
                 var data=[];
-                var header = {"client": premiumRequest.clientGroup.name ,
+                $scope.header = {"client": premiumRequest.clientGroup.name ,
                  "group": premiumRequest.clientGroup.groupType ,
         
                   };
         
             //get Batches data, and construct an json Array
             angular.forEach(premiumRequest.batches, function(batch) {
-          		var i = $scope.state.amountOfFiles;
-          		angular.forEach(batch.policies ,  function(p) {
-					
-              		
-                //console.log(p);
-                $scope.getPolicies(p.policyId);
+              angular.forEach(batch.policies ,  function(p) {
+          
+                  $scope.getPolicies(p.policyId );
+          
 
-                  var batches = {"paymentFile": i ,
-                   		"insured":  p.policyId  , 
-                   		"carrier":"", 
-                   		"policy": "",  
-                   		"dueDate":  new Date() , 
-                   		"premiumAmount": p.paymentAmount ,
-                   		"disbursementType": "" , 
-                     	"anticipatedPayment":  new Date(),
-                  		"owner":   "" };
-            		data.push($.extend({}, header, batches));
-            		i++;
-              	});           
-            });
+                
+                    });           
+                });
               return data;
             }
 
-    	$scope.getPremiumRequest(premiumRequestId);        
+      $scope.getPremiumRequest(premiumRequestId);        
     });
     }]);
 
@@ -127,6 +127,6 @@
         // creating a new variable will add it to the form submit
 
         $scope.state.approved   = $scope.approved;
-      	
+        
 
       })

@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+
+import com.northstar.slxclient.client.model.PremiumRequest;
+import com.northstar.slxclient.client.model.PremiumRequestBatch;
 	
 public class PremiumRequestProcessState implements Serializable {
 	
@@ -25,10 +28,13 @@ public class PremiumRequestProcessState implements Serializable {
 	private Boolean approved;
 
 	// Responses from STEP 3 (Multiple)
-	private Collection<BatchPayment> batchPayments = new ArrayList<BatchPayment>();
+	//private Collection<BatchPayment> batchPayments = new ArrayList<BatchPayment>();
+	private Collection<PremiumRequestBatch> batchPayments = new ArrayList<PremiumRequestBatch>();
+
 	
 	// TODO: This object should be the PremiumRequest retrieved from the API
-	private String request;
+	//private String request;
+	private PremiumRequest request;
 
 	public String getClientGroupId() {
 		return clientGroupId;
@@ -94,19 +100,19 @@ public class PremiumRequestProcessState implements Serializable {
 		this.approved = approved;
 	}
 
-	public Collection<BatchPayment> getBatchPayments() {
+	public Collection<PremiumRequestBatch> getBatchPayments() {
 		return batchPayments;
 	}
 
-	public void setBatchPayments(Collection<BatchPayment> batchPayments) {
+	public void setBatchPayments(Collection<PremiumRequestBatch> batchPayments) {
 		this.batchPayments = batchPayments;
 	}
 
-	public String getRequest() {
+	public PremiumRequest getRequest() {
 		return request;
 	}
 
-	public void setRequest(String request) {
+	public void setRequest(PremiumRequest request) {
 		this.request = request;
 	}
 }

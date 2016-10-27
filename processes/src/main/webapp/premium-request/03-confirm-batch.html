@@ -51,10 +51,18 @@
 
 </div> 
 
+<div>
+     
+</div> 
+
+<div ng-if ="errorMessage" class="alert alert-danger">
+  {{errorMessage}}
+</div>
+
 <script cam-script type="text/form-script">
 //debugger;
   var apiUrl = "http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io";
-  var premiumRequestId = 2;
+  
 
    //Angular Datepicker
     $scope.anticipated_open = function($event) {
@@ -69,6 +77,7 @@
   	camForm.on('form-loaded', function() {
     // tell the form SDK to fetch the variable named 'invoiceData'
   			 camForm.variableManager.fetchVariable('state');
+         camForm.variableManager.fetchVariable('batch');
   	});
     }]);  
 
@@ -93,26 +102,33 @@
   inject([ '$scope', '$http', '$filter', function($scope, $http , $filter) {
   	camForm.on('variables-fetched', function() {
     	// work with the variable (bind it to the current AngularJS $scope)
+
     	$scope.state = camForm.variableManager.variableValue('state');
+      $scope.batch = camForm.variableManager.variableValue('batch');
+
+      
+      var premiumRequestId = $scope.state.request.id ;
+      console.log($scope.batch);
+      var currentBatch= 0;
+      console.log("amount" + $scope.state.batchPayments[currentBatch].paymentAmount);
+      
 
          $scope.getPremiumRequest = function(id) {  
               //Get Method
               $http.get(apiUrl+"/premium-requests/"+id).then(function(result) {
 
               	    $scope.data = [];
-              	   
-					             	
-
+                    $scope.getData(result.data);
+                    $scope.dataTable = new wijmo.collections.CollectionView($scope.data);
+                    
                             	
               
             }, function errorCallback(response) {
                 // called asynchronously if an error occurs
                 // or server returns response with an error status.
                 console.log("error");
-          }).then( function(){console.log("ultimo then :P");  
-          	 $scope.getData(result.data);
-          	 $scope.dataTable = new wijmo.collections.CollectionView($scope.data); } );
-          ;
+          });
+          
 
 
 
@@ -120,14 +136,13 @@
 
          //get Data
     	$scope.getData= function(premiumRequest) {
-    		//console.log(premiumRequest.batches[0].policies);
-	        //$scope.data = [];
+    		
 	        // Convert String Dates to Date object
         	angular.forEach(premiumRequest.batches, function(batch) {
-            	 //console.log(batch);
+        
             	 
             	 angular.forEach(batch.policies, function(policy) {
-            	 		console.log(policy.policyId);
+        
             	 		$scope.getPolicy(policy.policyId);
 
 
@@ -136,7 +151,7 @@
         		});
 
         	});
-        	console.log($scope.data);
+        
     		
     	}
 
@@ -144,19 +159,18 @@
               //Get Method
               $http.get(apiUrl+"/policies/"+id).then(function(result) {
          
-                
+                var p =result.data;
                 var policy ={
-			            insured: 1,
-			    		carrier : "String",
-			    		policyNro : "String",
-			            dueDate: new Date(),
-			            amountPayment: Math.random() * 10000,
-			            paymentDate: new Date(),
-			            amount: Math.random() * 10000,
-		        		};
-		       	//console.log(result.data);
-		       	console.log($scope.data);
-		        $scope.data.push(policy);
+			            insured: p.insured.name,
+			    		    carrier : p.carrier.name,
+    			    		policyNro : p.id,
+    			            dueDate: new Date(p.currentPremium.dueDate),
+    			            amountPayment: p.currentPremium.paymentAmount,
+    			            paymentDate: new Date(p.currentPremium.dueDate),
+    			            amount: p.currentPremium.paymentAmount,
+    		        		};
+    		
+    		        $scope.data.push(policy);
 
 
 
@@ -165,7 +179,11 @@
                 // called asynchronously if an error occurs
                 // or server returns response with an error status.
                 console.log("error");
-          }).then( function(par){console.log("then :P",$scope.data) ;});
+          }).then( function(){
+            
+             $scope.dataTable.refresh(); 
+            
+              });
           ;
             
         } 
@@ -198,8 +216,43 @@
         // this callback is executed when the form is submitted, *before* the submit request to
         // the server is executed
         // creating a new variable will add it to the form submit
+                
+        
+        $scope.formIsValid =  function(){
+            
+            $scope.dataTable.refresh();
+            var valid =  true;
 
-        console.log("submited");
+            angular.forEach($scope.dataTable.items, function(item) {
+                  
+                  if (  valid && (!angular.isDate(item.paymentDate) || item.paymentDate.toString() ==="Invalid Date")) {  
+                    $scope.errorMessage="Warning - You must complete All the Payments Date";
+                     valid=false;
+        
+                  }
+
+
+                  if (  valid && item.amount == null) {  
+                    $scope.errorMessage="Warning - You must complete All the Payments Amount";
+                     valid=false;
+        
+                  }
+
+            });
+
+            return valid
+        }
+
+
+        // may prevent the submit from being executed:
+        if (!$scope.formIsValid()){
+            evt.submitPrevented = true;
+        } else {
+            evt.submitPrevented = false;
+        }
+        
+        
+
       });
 
 

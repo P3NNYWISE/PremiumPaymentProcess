@@ -109,7 +109,7 @@
     $scope.groupBy = function (groupBy) {    
         var groupDesc = new wijmo.collections.PropertyGroupDescription(groupBy);
         $scope.dataTable.groupDescriptions.push(groupDesc);
-        $scope.dataTable.sortDescriptions.push(new wijmo.collections.SortDescription('PaymentFile', true));
+
 
 
         }
@@ -133,81 +133,116 @@
 		//set 
 		$scope.approved=false;
 		//Request retrieve by the API - To Do
-    var premiumRequestId = $scope.state.request.id ;
- 
+		//var premiumRequestId = $scope.request ;
+  		var premiumRequestId = 2; 
          
 
         // Get Premium Request from the api , and populate the grid
     	$scope.getPremiumRequest = function(id) {  
               //Get Method
               $http.get(apiUrl+"/premium-requests/"+id).then(function(result) {
+                  console.log(result.data);
                   $scope.premiumRequest=result.data;
+                  //$scope.data = new wijmo.collections.CollectionView($scope.getData(result.data));
                   $scope.data = []
                   $scope.getData(result.data);
                   $scope.dataTable = new wijmo.collections.CollectionView($scope.data);
-                  
-                  // group and sort items by amount in descending order
+  				        
+  				        //$scope.getData(result.data);
                   $scope.groupBy(groupBy);
-               
+                  // sort items by amount in descending order
+                  var sd = new wijmo.collections.SortDescription('PaymentFile', true);
+                  $scope.dataTable.sortDescriptions.push(sd);
+  				      
+                
+              
             }, function errorCallback(response) {
                 // called asynchronously if an error occurs
                 // or server returns response with an error status.
                 console.log("error");
-          });
+          }).then(function(){ console.log("Then premium")});
             
         } 
       // Get Premium Request from the api , and populate the grid
         $scope.getPolicies = function(id , paymentFile) {  
               //Get Method
               $http.get(apiUrl+"/policies/"+id).then(function(result) {
+                console.log(result.data);
                   var p = result.data;
                  var policy = {"policy": p.id , 
                                 "paymentFile": paymentFile, 
                                 "insured":  p.insured.name, 
                                   "carrier":p.carrier.name, 
-                                  "dueDate":  new Date(p.currentPremium.dueDate), 
+                                  "dueDate":  p.currentPremium.dueDate , 
                                   "premiumAmount": p.currentPremium.paymentAmount ,
                               "disbursementType": p.carrier.disbursementType , 
                               "anticipatedPayment":  new Date($scope.state.paymentDates[paymentFile-1]),
                               "owner":  p.owner.name };
-                  $scope.data.push($.extend({}, $scope.header, policy));              
+                  $scope.data.push($.extend({}, $scope.header, policy));
+
+                
+              
             }, function errorCallback(response) {
                 // called asynchronously if an error occurs
                 // or server returns response with an error status.
                 console.log("error");
-          }).then(function(){ 
+          }).then(function(){ console.log("Then policies");
+
+          
                   $scope.dataTable.refresh(); 
             });
+            
         }
 
-            // get data to the Grid 
+            // get data to the Grid ,
             $scope.getData = function(premiumRequest) {
+                var data=[];
                 $scope.header = {"client": premiumRequest.clientGroup.name ,
                  "group": premiumRequest.clientGroup.groupType ,
+        
                   };
-                //get Batches data, and construct a json Array 
+        
+                //get Batches data, and construct an json Array
                 var i = 1;
                 angular.forEach(premiumRequest.batches, function(batch) {
+          		      
           		      angular.forEach(batch.policies ,  function(p) {
-					              $scope.getPolicies(p.policyId , i );                		    
+					
+					              $scope.getPolicies(p.policyId , i );
+                   
+                        
+
+                		    
                   	}); 
                     i++;          
                 });
+              return data;
             }
+
     	$scope.getPremiumRequest(premiumRequestId);        
     });
     }]);
+   camForm.on('variables-applied', function() {
+        // handle variables applied
+        
+
+        console.log("vbles applied");
 
 
 
-
+    });
     //Before Submit
        camForm.on('submit', function(evt) {
         // this callback is executed when the form is submitted, *before* the submit request to
         // the server is executed
         // creating a new variable will add it to the form submit
 
-        $scope.state.approved   = $scope.approved;      	
+        $scope.state.approved   = $scope.approved;
+      	
+
       })
+
+
 </script>
+
 </form>

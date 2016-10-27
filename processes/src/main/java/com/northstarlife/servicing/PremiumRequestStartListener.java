@@ -13,7 +13,7 @@ public class PremiumRequestStartListener implements ExecutionListener
     	
 		// CreateBatchPayment objects
 		PremiumRequestProcessState state = (PremiumRequestProcessState) execution.getVariable("state");
-	
+		//state.setAmountOfFiles(1);
 		
     	Utils.Log.info("State created");
     }
