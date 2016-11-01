@@ -1,3 +1,292 @@
-<form>
-GRID FOR CALL
+<form role="form" name="CarriersCall">
+
+<div class="container">
+  
+
+ <div class="row page-header ">
+ <label   class="form-group col-sm-3" for="carriers">Id  :  {{currentCarrier.id}}</label>
+    <label   class="form-group col-sm-3" for="carriers">Carriers  :  {{currentCarrier.name}}</label>
+    <label   class="form-group col-sm-3" for="Fields1  "> DisbursementType  : {{currentCarrier.disbursementType}}</label>
+    <label   class="form-group col-sm-3" for="Fields2">Phone : {{currentCarrier.phone}}</label>
+
+
+  
+	</div>
+
+
+
+
+
+<!-- Table -->
+<div class="form-group ">
+  <!-- this is the grid --> 
+  <wj-flex-grid  items-source="dataTable"    >
+     <wj-flex-grid-column header="Insured Name" binding="insured" is-read-only="true" width="*"></wj-flex-grid-column>
+               
+     <wj-flex-grid-column header="Carrier" binding="carrier" is-read-only="true"></wj-flex-grid-column>
+     <wj-flex-grid-column header="Policy Number" binding="policyId" is-read-only="true"></wj-flex-grid-column>
+     <wj-flex-grid-column header="Due Date" binding="dueDate" is-read-only="true"></wj-flex-grid-column>
+     <wj-flex-grid-column header="Amount Requested" binding="amountPayment" format="n2" aggregate="Sum" is-read-only="true"></wj-flex-grid-column>
+     <wj-flex-grid-column header="Actual Date Paid" binding="paymentDate" ></wj-flex-grid-column>
+     <wj-flex-grid-column header="Actual Amount Paid" binding="amount" format="n2" aggregate="Sum" ></wj-flex-grid-column>
+
+
+
+
+     <wj-flex-grid-column header="Status" binding="status"  ></wj-flex-grid-column>
+     <!--
+     <wj-flex-grid-column header="Edit" >  <button type="button" ng-click="openModal()" class="btn" id="myBtn">Open Modal</button></wj-flex-grid-column>
+     -->
+
+
+
+  </wj-flex-grid>
+
+
+</div>
+
+ <button type="button" ng-click="openModal()" class="btn" id="myBtn">Open Modal</button>
+
+
+  <!-- Modal -->
+  <div class="modal fade in " id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" ng-click="closeModal()" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Modal Header</h4>
+        </div>
+        <div class="modal-body">
+          <p>Some text in the modal.</p>
+
+
+
+        </div>
+        <div class="modal-footer">
+        <button type="button" ng-click="closeModal()" class="btn btn-default" >OK</button>
+        <button type="button" ng-click="closeModal()" class="btn btn-default" >Issue</button>
+          <button type="button" ng-click="closeModal()" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+
+
+    <button 
+        class="btn btn-default" 
+        data-toggle="modal" 
+        data-target="#dlgDetail"
+        ng-click="cvEditing.editItem(currentItem)"
+         >
+        Edit Detail...</button>
+
+<!-- a dialog for editing item details -->
+  <div class="modal  in fade" id="dlgDetail">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button 
+              type="button" 
+              class="close" 
+              data-dismiss="modal" 
+              aria-hidden="true">
+          &times;</button>
+          <h4 class="modal-title">Edit Item</h4>
+        </div>
+        <div class="modal-body">
+          <dl class="dl-horizontal">
+            <dt>ID</dt>
+            <dd>
+              <input 
+                  class="form-control" 
+                  type="text" 
+                  ng-model="currentItem.id" />
+            </dd>
+            <dt>Start Date</dt>
+            <dd>
+              <input 
+                  formatted-model 
+                  class="form-control" 
+                  type="text" 
+                  ng-model="currentItem.start" />
+            </dd>
+            <dt>End Start</dt>
+            <dd>
+              <input 
+                  formatted-model 
+                  class="form-control" 
+                  type="text" 
+                  ng-model="currentItem.end" />
+            </dd>
+            <dt>Country</dt>
+            <dd>
+              <input 
+                  class="form-control" 
+                  type="text" 
+                  ng-model="currentItem.country" />
+            </dd>
+            <dt>Product</dt>
+            <dd>
+              <input 
+                  class="form-control" 
+                  type="text" 
+                  ng-model="currentItem.product" />
+            </dd>
+            <dt>Color</dt>
+            <dd>
+              <input 
+                  class="form-control" 
+                  type="text" 
+                  ng-model="currentItem.color" />
+            </dd>
+            <dt>Amount</dt>
+            <dd>
+              <input 
+                  class="form-control" 
+                  type="text" 
+                  ng-model="currentItem.amount" />
+            </dd>
+            <dt>Active</dt>
+            <dd>
+              <input 
+                  class="form-control" 
+                  type="checkbox" 
+                  ng-model="currentItem.active" />
+            </dd>
+          </dl>
+        </div>
+        <div class="modal-footer">
+          <button 
+              type="button" 
+              class="btn btn-primary" 
+              data-dismiss="modal" 
+              ng-click="confirmUpdate()">
+           OK</button>
+          <button 
+              type="button" 
+              class="btn btn-warning" 
+              data-dismiss="modal" 
+              ng-click="cancelUpdate()">
+            Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script cam-script type="text/form-script">
+
+	//debugger;
+
+
+  // Get the modal
+var modal = document.getElementById('myModal');
+
+// Get the button that opens the modal
+//var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+//var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on the button, open the modal 
+
+//btn.onclick = function() {
+  //  modal.style.display = "block";
+//}
+
+// When the user clicks on <span> (x), close the modal
+//span.onclick = function() {
+//    modal.style.display = "none";
+//}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+$scope.openModal = function(){
+  modal.style.display = "block";
+
+};
+
+
+$scope.closeModal = function(){
+  modal.style.display = "none";
+
+};
+///
+  
+  	var apiUrlMock = "http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/slx-api/v1 ";
+  	var apiUrl = "http://localhost:8080/slx-api/v1";
+  
+	//create Data Table
+  	$scope.data = [];
+
+  	$scope.dataTable = new wijmo.collections.CollectionView($scope.data);
+ 
+
+
+   
+   //On Form Load
+   inject([ '$scope', '$http', function($scope, $http) {
+   camForm.on('form-loaded', function() {
+    // tell the form SDK to fetch the variable named
+  			 camForm.variableManager.fetchVariable('policiesPerGroup');
+         
+  	});
+    }]);  
+
+   //On Variables Fetched
+   inject([ '$scope', '$http', '$filter', function($scope, $http , $filter) {
+  	camForm.on('variables-fetched', function() {
+  
+
+    	$scope.policiesPerGroup = camForm.variableManager.variableValue('policiesPerGroup');
+		  $scope.currentCarrier = $scope.policiesPerGroup[0].carrier;
+
+      $scope.getData = function (){
+			 angular.forEach($scope.policiesPerGroup, function(item) {
+			 	 var policy ={
+                  insured: "item.insured.name",
+                  carrier : item.carrier.name,
+                  policyId : item.id,
+                  dueDate: new Date(),
+                  amountPayment: 1000,
+                  paymentDate: new Date(),
+                  amount: 10000,
+      				  	status: "Pending",				
+                };	
+					console.log(item);
+					$scope.data.push(policy);                
+        	});
+			 $scope.dataTable.refresh();  
+		  }
+
+
+		$scope.getData();
+  	});
+    }]);  
+
+
+
+
+    camForm.on('submit', function(evt) {
+      // handle submit
+      // may prevent the submit from being executed:
+      //evt.submitPrevented = true;
+    });
+
+
+
+</script>
 </form>
+

@@ -5,17 +5,33 @@ import java.util.ArrayList;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 
+import com.northstar.slxclient.client.model.Carrier;
+import com.northstar.slxclient.client.model.Policy;
+import com.northstarlife.Utils;
+
 public class RetrieveGroupedCarrierPoliciesService implements JavaDelegate {
 
 	public void execute(DelegateExecution execution) throws Exception {
 		
 		// This should be an array of CarrierGroup entity, probably returned from API call
-		ArrayList<String> list = new ArrayList<String>();
-		list.add("Group1");
-		list.add("Group2");
-		list.add("Group3");
-		list.add("Group4");
+		// 
+		//filter bay Carrier and Status Pending and sending to CarrierCallState
+		Carrier currentCarrier =  new Carrier();
+		currentCarrier.setId("2");
+		currentCarrier.setName("Carrier 1");
 		
-		execution.setVariable("policiesPerGroup", list);		
+		ArrayList<Policy> list = new ArrayList<Policy>();
+		for (int i=1 ; i<=10 ; i++ ){
+			Policy currentPolicy =  new Policy();
+			currentPolicy.setId(String.valueOf(i));
+			currentPolicy.setCarrier(currentCarrier);
+			list.add(currentPolicy);
+			
+		}
+		//API Call Retrieve policies per group
+
+
+		execution.setVariable("policiesPerGroup", list);	
+		Utils.Log.info(">>>>> Retrieve Grouped Listener created");
 	}
 }

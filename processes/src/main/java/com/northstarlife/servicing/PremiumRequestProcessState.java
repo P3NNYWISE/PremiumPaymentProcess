@@ -7,6 +7,8 @@ import java.util.Date;
 
 import com.northstar.slxclient.client.model.PremiumRequest;
 import com.northstar.slxclient.client.model.PremiumRequestBatch;
+import com.northstar.slxclient.client.model.Policy ;
+import com.northstar.slxclient.client.model.PolicyPremium;
 	
 public class PremiumRequestProcessState implements Serializable {
 	
@@ -35,6 +37,12 @@ public class PremiumRequestProcessState implements Serializable {
 	// TODO: This object should be the PremiumRequest retrieved from the API
 	//private String request;
 	private PremiumRequest request;
+
+	// Current Premium response from STEP 3 
+	//private Collection<BatchPayment> batchPayments = new ArrayList<BatchPayment>();
+	private Collection<Policy> policy = new ArrayList<Policy>();
+
+
 
 	public String getClientGroupId() {
 		return clientGroupId;
@@ -115,4 +123,12 @@ public class PremiumRequestProcessState implements Serializable {
 	public void setRequest(PremiumRequest request) {
 		this.request = request;
 	}
+	public Collection<Policy> getPolicy() {
+		return policy;
+	}
+
+	public void setPolicy(Collection<Policy> policy) {
+		this.policy = policy;
+	}
+
 }

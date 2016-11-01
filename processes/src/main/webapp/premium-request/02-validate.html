@@ -90,7 +90,9 @@
     //Var
     var groupBy = 'paymentFile';
 
-    var apiUrl = "http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/slx-api/v1 ";
+    var apiUrlMock = "http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/slx-api/v1 ";
+    var apiUrl = "http://localhost:8080/slx-api/v1";
+  
    
     // add a footer row to the grid
     $scope.initGrid = function (s, e) {
@@ -133,14 +135,15 @@
 		//set 
 		$scope.approved=false;
 		//Request retrieve by the API - To Do
-    var premiumRequestId = $scope.state.request.id ;
+    //var premiumRequestId = $scope.state.request.id ;
+    var premiumRequestId = "42";
  
          
 
         // Get Premium Request from the api , and populate the grid
     	$scope.getPremiumRequest = function(id) {  
               //Get Method
-              $http.get(apiUrl+"/premium-requests/"+id).then(function(result) {
+              $http.get(apiUrl +"/premium-requests/"+id).then(function(result) {
                   $scope.premiumRequest=result.data;
                   $scope.data = []
                   $scope.getData(result.data);
@@ -159,7 +162,7 @@
       // Get Premium Request from the api , and populate the grid
         $scope.getPolicies = function(id , paymentFile) {  
               //Get Method
-              $http.get(apiUrl+"/policies/"+id).then(function(result) {
+              $http.get(apiUrlMock+"/policies/"+id).then(function(result) {
                   var p = result.data;
                  var policy = {"policy": p.id , 
                                 "paymentFile": paymentFile, 

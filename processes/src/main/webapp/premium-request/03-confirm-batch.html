@@ -38,7 +38,7 @@
   <wj-flex-grid  items-source="dataTable"    >
      <wj-flex-grid-column header="Insured Name" binding="insured" is-read-only="true"></wj-flex-grid-column>
      <wj-flex-grid-column header="Carrier" binding="carrier" is-read-only="true"></wj-flex-grid-column>
-     <wj-flex-grid-column header="Policy Number" binding="policyNro" is-read-only="true"></wj-flex-grid-column>
+     <wj-flex-grid-column header="Policy Number" binding="policyId" is-read-only="true"></wj-flex-grid-column>
      <wj-flex-grid-column header="Due Date" binding="dueDate" is-read-only="true"></wj-flex-grid-column>
      <wj-flex-grid-column header="Amount Requested" binding="amountPayment" format="n2" aggregate="Sum" is-read-only="true"></wj-flex-grid-column>
      <wj-flex-grid-column header="Actual Date Paid" binding="paymentDate" ></wj-flex-grid-column>
@@ -61,9 +61,11 @@
 
 <script cam-script type="text/form-script">
 //debugger;
-  var apiUrl = "http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io";
   
-
+  var apiUrlMock = "http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/slx-api/v1 ";
+  var apiUrl = "http://localhost:8080/slx-api/v1";
+  
+  
    //Angular Datepicker
     $scope.anticipated_open = function($event) {
         $event.preventDefault();
@@ -83,18 +85,12 @@
 
 
 
-
-
-
-
     //On Change Premium Request Anticipated Date select
     $scope.premiumRequestanticipatedDateUpdated= function() {
-    		
-    		// 
         	angular.forEach($scope.data, function(item) {
         			item.paymentDate = $scope.anticipatedDateSelected;
         });
-		$scope.dataTable.refresh();
+		    $scope.dataTable.refresh();
     };
 
 
@@ -107,74 +103,24 @@
       $scope.batch = camForm.variableManager.variableValue('batch');
 
       
-      var premiumRequestId = $scope.state.request.id ;
-      console.log($scope.batch);
-      var currentBatch= 0;
-      console.log("amount" + $scope.state.batchPayments[currentBatch].paymentAmount);
-      
-
-         $scope.getPremiumRequest = function(id) {  
+      $scope.getPolicy = function(id) {  
               //Get Method
-              $http.get(apiUrl+"/premium-requests/"+id).then(function(result) {
-
-              	    $scope.data = [];
-                    $scope.getData(result.data);
-                    $scope.dataTable = new wijmo.collections.CollectionView($scope.data);
-                    
-                            	
-              
-            }, function errorCallback(response) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-                console.log("error");
-          });
-          
-
-
-
-
-
-         //get Data
-    	$scope.getData= function(premiumRequest) {
-    		
-	        // Convert String Dates to Date object
-        	angular.forEach(premiumRequest.batches, function(batch) {
-        
-            	 
-            	 angular.forEach(batch.policies, function(policy) {
-        
-            	 		$scope.getPolicy(policy.policyId);
-
-
-            	 	
-            	 
-        		});
-
-        	});
-        
-    		
-    	}
-
-    	 $scope.getPolicy = function(id) {  
-              //Get Method
-              $http.get(apiUrl+"/policies/"+id).then(function(result) {
+              $http.get(apiUrlMock +"/policies/"+id).then(function(result) {
          
                 var p =result.data;
                 var policy ={
-			            insured: p.insured.name,
-			    		    carrier : p.carrier.name,
-    			    		policyNro : p.id,
-    			            dueDate: new Date(p.currentPremium.dueDate),
-    			            amountPayment: p.currentPremium.paymentAmount,
-    			            paymentDate: new Date(p.currentPremium.dueDate),
-    			            amount: p.currentPremium.paymentAmount,
-    		        		};
-    		
-    		        $scope.data.push(policy);
-
-
-
-              
+                  insured: p.insured.name,
+                  carrier : p.carrier.name,
+                  id:p.currentPremium.id,
+                  policyId : p.id,
+                      dueDate: new Date(p.currentPremium.dueDate),
+                      amountPayment: p.currentPremium.paymentAmount,
+                      paymentDate: new Date(p.currentPremium.dueDate),
+                      amount: p.currentPremium.paymentAmount,
+                    };
+                
+                $scope.data.push(policy);
+                
             }, function errorCallback(response) {
                 // called asynchronously if an error occurs
                 // or server returns response with an error status.
@@ -184,30 +130,41 @@
              $scope.dataTable.refresh(); 
             
               });
-          ;
-            
+                      
         } 
 
 
+      //get Batch Policies
+      $scope.getBatchPolicies= function() {
+              $scope.data = [];
+              $scope.dataTable = new wijmo.collections.CollectionView($scope.data);
+              angular.forEach(scope.batch.policies, function(policy) {    
+                  $scope.getPolicy(policy.policyId);
+          });              
+      }
 
-        } 
-	
+      $scope.updateCurrentPremiums =  function(){
+            angular.forEach($scope.dataTable.items, function(item) {  
+                //Uncomment  to test with real policies
 
-        $scope.getPremiumRequest(premiumRequestId);   
+                //var currentPremium = $filter('filter')($scope.state.policyPremiums , {id: item.policyId})[0];
+                
+                var currentPolicy = $scope.state.policy[0];
+                
+                currentPolicy.currentPremium= {id: item.id , paymentDate: item.paymentDate , paymentAmount: item.amount};
 
-      
+                //currentPolicy.currentPremium.id = item.id
+               //currentPremium.paymentDate = item.paymentDate;
+                //currentPremium.paymentAmount = item.amount;
+                
+            });
+
+      }
+
+        $scope.getBatchPolicies();        
         
   	});
     }]);
-
-
-
-
-    
-
-
-
-
 
 
 	//Before Submit
@@ -216,8 +173,7 @@
         // this callback is executed when the form is submitted, *before* the submit request to
         // the server is executed
         // creating a new variable will add it to the form submit
-                
-        
+     
         $scope.formIsValid =  function(){
             
             $scope.dataTable.refresh();
@@ -243,21 +199,17 @@
             return valid
         }
 
-
         // may prevent the submit from being executed:
         if (!$scope.formIsValid()){
-            evt.submitPrevented = true;
+              evt.submitPrevented = true;
         } else {
-            evt.submitPrevented = false;
+              $scope.updateCurrentPremiums();
+              evt.submitPrevented = false;
         }
         
-        
-
       });
 
-
-
-
 </script>
-
 </form>
+
+

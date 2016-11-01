@@ -255,6 +255,9 @@
 
   <script cam-script type="text/form-script">
 
+      var apiUrl = "http://localhost:8080/slx-api/v1";
+      var apiUrlMock = "http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/slx-api/v1 ";
+
    //Angular Datepicker
     $scope.from_open = function($event) {
         $event.preventDefault();
@@ -310,7 +313,7 @@
 
         $scope.getClients = function() {  
           //Get Method
-          $http.get("http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/client-groups").then(function(result) {
+          $http.get(apiUrl +"/client-groups").then(function(result) {
           
               $scope.clientGroup= result.data;
           
@@ -322,8 +325,9 @@
         } 
         $scope.getPaymentDates = function(current_date , count,workable_days) {  
           //Get Method
-          $http.get("http://zsqbkee7tah5mmf4a-mock.stoplight-proxy.io/premium-requests/payment-dates").then(function(result) {
+          $http.get(apiUrl+"/premium-requests/payment-dates?current_date=" + current_date).then(function(result) {
                     $scope.paymentDates= []
+                    console.log(result.data);
                     // Convert String  to Date
                     angular.forEach(result.data, function(date) {
                       $scope.paymentDates.push( new Date(date));
@@ -347,11 +351,10 @@
       $scope.paymentAgents=[$scope.selectedClientGroup.paymentAgent];
       $scope.selectedPaymentAgent=$scope.paymentAgents[0];
 
-      //$scope.paymentDates =[];
-    
+   
       
       //if client Group Selected  "viva"
-      if ($scope.selectedClientGroup.name.includes("VIVA")){
+      if ($scope.selectedClientGroup.name.includes("Viva")){
             $scope.amountOfFiles=[{"name":"4 Payment File","value": 4}];
             $scope.vivaGroupSelected=true;
       } else{
@@ -367,7 +370,9 @@
 
     $scope.parseDate = function(date){
           var month = parseInt(date.getMonth())+1;
-          var parse_date = month+"/"+date.getDate()+"/"+date.getFullYear();
+          //var parse_date = month+"/"+date.getDate()+"/"+date.getFullYear();
+          var parse_date = date.getFullYear()+"-"+month+"-"+date.getDate();
+          console.log(parse_date);
           return parse_date;
 
     }

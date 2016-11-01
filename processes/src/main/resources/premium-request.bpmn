@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.2.2">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="1.3.0">
   <bpmn:collaboration id="Collaboration_00xp3di">
     <bpmn:participant id="Participant_1yrudrk" name="Premium Request&#10;" processRef="Process_1" />
   </bpmn:collaboration>
@@ -33,6 +33,7 @@
     <bpmn:userTask id="validatePaymentInstructions" name="Validate the Payment Instructions" camunda:formKey="embedded:app:premium-request/02-validate.html">
       <bpmn:extensionElements>
         <camunda:executionListener class="com.northstarlife.servicing.ValidateInstructionsListener" event="end" />
+        <camunda:taskListener class="com.northstarlife.servicing.ValidateInstructionsTaskListener" event="complete" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0y3jzql</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0bdkpsj</bpmn:outgoing>
@@ -53,6 +54,7 @@
     <bpmn:userTask id="confirmPayments" name="Confirm Batch Payment" camunda:formKey="embedded:app:premium-request/03-confirm-batch.html">
       <bpmn:extensionElements>
         <camunda:executionListener class="com.northstarlife.servicing.ConfirmBatchPaymentListener" event="end" />
+        <camunda:taskListener class="com.northstarlife.servicing.ConfirmBatchPaymentTaskListener" event="complete" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_13vkqng</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_112kf5n</bpmn:outgoing>
